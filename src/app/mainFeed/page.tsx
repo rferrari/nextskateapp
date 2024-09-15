@@ -34,8 +34,8 @@ import CommentList from "./components/CommentsList";
 import LoadingComponent from "./components/loadingComponent";
 import AvatarMediaModal from "./components/mediaModal";
 
-const parent_author = process.env.NEXT_PUBLIC_MAINFEED_AUTHOR || "skatehacker";
-const parent_permlink = process.env.NEXT_PUBLIC_MAINFEED_PERMLINK || "test-advance-mode-post";
+const parent_author = process.env.NEXT_PUBLIC_MAINFEED_AUTHOR || "pixbee";
+const parent_permlink = process.env.NEXT_PUBLIC_MAINFEED_PERMLINK || "2024-08-15-atualizacao-do-projeto-pixbee";
 
 export interface Comment {
   id: number;

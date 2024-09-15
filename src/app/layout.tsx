@@ -1,7 +1,7 @@
 // src/app/RootLayout.tsx
 
 import Favicon from "@/components/FaviconLinks";
-import MobileNavbar from "@/components/Navbar/MobileNavbar";
+// import MobileNasvbar from "@/components/Navbar/MobileNavbar";
 import { getWebsiteURL } from "@/lib/utils";
 import { Flex } from "@chakra-ui/react";
 import dynamic from 'next/dynamic';
@@ -83,7 +83,7 @@ export default function RootLayout({
               <SidebarWrapper />
             </div>
             <div className="mobile-menu-button">
-              <MobileNavbar />
+              {/* <MobileNavbar /> */}
             </div>
             {children}
           </Flex>

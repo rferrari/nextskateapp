@@ -145,7 +145,7 @@ const TransactionHistory = () => {
                         <Text fontSize="lg">
                             Benefactor Reward for {details.benefactor} on
                             <a href={`https://skatehive.app/post/@${details.author}/${details.permlink}`} target="_blank" rel="noopener noreferrer">
-                                {details.author}'s comment
+                                {details.author}&apos;s comment
                             </a>
                             : {details.hbd_payout} HBD, {details.hive_payout} HIVE, {details.vesting_payout} VESTS
                         </Text>

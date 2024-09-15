@@ -50,12 +50,14 @@ export const EditCommentModal = ({ isOpen, onClose, commentBody, onSave, post, u
     const [isPreview, setIsPreview] = useState(false);
 
     useEffect(() => {
-        const parsedMetadata: Metadata = JSON.parse(post.json_metadata);
-        const postImagesFromMetadata = parsedMetadata.images || [];
-        const imagesFromContent = extractImagesFromContent(post.body);
-        const mergedImages = Array.from(new Set([...postImagesFromMetadata, ...imagesFromContent]));
+        if(post && post.json_metadata) {//@vaipraonde?
+            const parsedMetadata: Metadata = JSON.parse(post.json_metadata);
+            const postImagesFromMetadata = parsedMetadata.images || [];
+            const imagesFromContent = extractImagesFromContent(post.body);
+            const mergedImages = Array.from(new Set([...postImagesFromMetadata, ...imagesFromContent]));
 
-        setPostImages(mergedImages);
+            setPostImages(mergedImages);
+        }
     }, [post.body, post.json_metadata]);
 
     const dmp = new diff_match_patch();

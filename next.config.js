@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
+    productionBrowserSourceMaps:false,
+    optimizeFonts:false,
+    
     async headers() {
         return [
             {
