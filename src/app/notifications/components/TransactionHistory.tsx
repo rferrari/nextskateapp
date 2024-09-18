@@ -77,17 +77,14 @@ const TransactionHistory = () => {
                     <HStack key={index} p={4} borderBottom="1px solid gray">
                         <AuthorAvatar username={details.from} boxSize={10} />
 
-
                         <Text fontSize="lg">
                             <HStack>
                                 <Text fontSize="lg">
-
                                     Transfer from {details.from} to {details.to}: {details.amount}
                                 </Text>
                                 <FaHive color="red" size={16} />
                             </HStack>
                             {details.memo && <Text><strong>Memo:</strong> {details.memo}</Text>}
-
                         </Text>
                     </HStack>
                 );
@@ -96,13 +93,8 @@ const TransactionHistory = () => {
                     <HStack key={index} p={4} borderBottom="1px solid gray">
                         <AuthorAvatar username={details.author} boxSize={10} />
                         <Text fontSize="lg">
-                            Vote on {details.author} s
-                            <a href={`https://skatehive.app/post/@${details.author}/${details.permlink}`} target="_blank" rel="noopener noreferrer">
-                                comment
-                            </a>
-                            : Payout: {details.pending_payout}
+Vote on {details.author}&apos;s <a href={`https://skatehive.app/post/@${details.author}/${details.permlink}`} target="_blank" rel="noopener noreferrer">comment</a>. Payout: {details.pending_payout}
                         </Text>
-
                     </HStack>
                 );
             case "curation_reward":
@@ -110,7 +102,7 @@ const TransactionHistory = () => {
                     <HStack key={index} p={4} borderBottom="1px solid gray">
                         <AuthorAvatar username={details.comment_author} boxSize={10} />
                         <Text fontSize="lg">
-                            Curation Reward: {details.reward} VESTS for voting on {details.comment_author}s post
+Curation Reward: {details.reward} VESTS for voting on {details.comment_author}&apos;s post
                         </Text>
                     </HStack>
                 );
@@ -119,7 +111,7 @@ const TransactionHistory = () => {
                     <HStack key={index} p={4} borderBottom="1px solid gray">
                         <AuthorAvatar username={details.author} boxSize={10} />
                         <Text fontSize="lg">
-                            Comment by {details.author}: {details.body}
+Comment by {details.author}: {details.body}
                         </Text>
                     </HStack>
                 );
@@ -128,13 +120,7 @@ const TransactionHistory = () => {
                     <HStack key={index} p={4} borderBottom="1px solid gray">
                         <AuthorAvatar username={details.voter} boxSize={10} />
                         <Text fontSize="lg">
-                            Vote by {details.voter} on {details.author}s
-
-                            <a href={`https://skatehive.app/post/@${details.author}/${details.permlink}`} target="_blank" rel="noopener noreferrer" >
-                                post
-                            </a>
-
-                            Weight: {details.weight}
+Vote by {details.voter} on {details.author}&apos;s <a href={`https://skatehive.app/post/@${details.author}/${details.permlink}`} target="_blank" rel="noopener noreferrer" >post</a>. Weight: {details.weight/100}&#37;
                         </Text>
                     </HStack>
                 );
@@ -143,11 +129,7 @@ const TransactionHistory = () => {
                     <HStack key={index} p={4} borderBottom="1px solid gray">
                         <AuthorAvatar username={details.benefactor} boxSize={10} />
                         <Text fontSize="lg">
-                            Benefactor Reward for {details.benefactor} on
-                            <a href={`https://skatehive.app/post/@${details.author}/${details.permlink}`} target="_blank" rel="noopener noreferrer">
-                                {details.author}&apos;s comment
-                            </a>
-                            : {details.hbd_payout} HBD, {details.hive_payout} HIVE, {details.vesting_payout} VESTS
+Benefactor Reward for {details.benefactor} on <a href={`https://skatehive.app/post/@${details.author}/${details.permlink}`} target="_blank" rel="noopener noreferrer"> {details.author}&apos;s comment</a>. {details.hbd_payout} HBD, {details.hive_payout} HIVE, {details.vesting_payout} VESTS
                         </Text>
                     </HStack>
                 );
