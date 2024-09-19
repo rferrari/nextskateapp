@@ -1,4 +1,4 @@
-import { CommentOperation, CommentOptionsOperation } from '@hiveio/dhive';
+import { CommentOperation, CommentOptionsOperation } from '../../../lib/hive/dhive/lib';
 
 export const formatBeneficiaries = (beneficiariesArray: any[]) => {
     let seen = new Set();

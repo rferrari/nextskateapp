@@ -20,7 +20,7 @@ import {
     Tooltip,
     VStack
 } from "@chakra-ui/react";
-import { Asset } from "@hiveio/dhive";
+import { Asset } from "../../../lib/hive/dhive/lib";
 import { SendIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { BsArrowDownCircle, BsArrowUpCircle } from "react-icons/bs";

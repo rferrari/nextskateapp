@@ -4,9 +4,9 @@
 //import { KeychainKeyTypes, KeychainRequestTypes } from 'keychain-sdk';
 //import { KeychainRequestTypes, KeychainKeyTypes } from 'keychain-sdk';
 import '@fontsource/creepster';
-import { Operation } from '@hiveio/dhive'; 
+import { Operation } from '../../lib/hive/dhive/lib'; 
 import { KeychainSDK, KeychainRequestTypes, KeychainKeyTypes } from 'keychain-sdk';
-import * as dhive from '@hiveio/dhive';
+import * as dhive from '../../lib/hive/dhive/lib';
 
 //import serverMailer from '../../lib/mailer/route';
 import * as invites from '../../lib/mailer/invite-helpers';

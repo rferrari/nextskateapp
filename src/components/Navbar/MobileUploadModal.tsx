@@ -5,7 +5,7 @@ import { useHiveUser } from "@/contexts/UserContext";
 import { useComments } from "@/hooks/comments";
 import { commentWithPrivateKey } from "@/lib/hive/server-functions";
 import { Button, Center, Image, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, Textarea } from "@chakra-ui/react";
-import * as dhive from "@hiveio/dhive";
+import * as dhive from "../../lib/hive/dhive/lib";
 import { useState } from "react";
 
 interface MobileUploadModalProps {

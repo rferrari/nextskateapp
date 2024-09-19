@@ -17,7 +17,7 @@ import {
   useBreakpointValue,
   VStack
 } from "@chakra-ui/react";
-import * as dhive from "@hiveio/dhive";
+import * as dhive from "../../lib/hive/dhive/lib";
 import piexif from 'piexifjs';
 import { useMemo, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";

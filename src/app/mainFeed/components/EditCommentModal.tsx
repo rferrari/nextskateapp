@@ -2,7 +2,7 @@ import { MarkdownRenderers } from '@/app/upload/utils/MarkdownRenderers';
 import { sendHiveOperation } from '@/lib/hive/server-functions';
 import PostModel from '@/lib/models/post';
 import { Box, Button, Center, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Textarea } from '@chakra-ui/react';
-import { Operation } from '@hiveio/dhive';
+import { Operation } from '../../../lib/hive/dhive/lib';
 import { diff_match_patch } from 'diff-match-patch';
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';

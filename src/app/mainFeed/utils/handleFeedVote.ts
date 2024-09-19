@@ -1,6 +1,6 @@
 import { vote } from "@/lib/hive/client-functions"
 import { voteWithPrivateKey } from "@/lib/hive/server-functions"
-import { VoteOperation } from "@hiveio/dhive"
+import { VoteOperation } from "../../../lib/hive/dhive/lib"
 export const handleVote = async (author: string, permlink: string, username: string) => {
   const loginMethod = localStorage.getItem("LoginMethod")
   if (!username) {

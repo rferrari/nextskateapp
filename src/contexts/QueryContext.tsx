@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import usePosts from '@/hooks/usePosts';
-import { Discussion } from '@hiveio/dhive';
+import { Discussion } from '../lib/hive/dhive/lib';
 
 interface QueryContextProps {
     posts: Discussion[] | null | undefined;

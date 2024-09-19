@@ -1,7 +1,7 @@
 'use client'
 
 import ETHprofile from "@/components/Profile/ETHprofile";
-import ProfileHeader from "@/components/Profile/ProfileHeader";
+// import ProfileHeader from "@/components/Profile/ProfileHeader";
 import ProfileTabs from "@/components/Profile/profileTabs";
 import useHiveAccount from "@/hooks/useHiveAccount";
 import { Box, Center } from "@chakra-ui/react";
@@ -41,7 +41,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     gap={{ base: 4, md: 6 }}
       
 >
-      <ProfileHeader user={hiveAccount} />
+      {/* <ProfileHeader user={hiveAccount} /> */}
       <ProfileTabs user={hiveAccount} />
     </Box>
   );

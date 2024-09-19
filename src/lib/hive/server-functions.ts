@@ -1,7 +1,7 @@
 "use server"
 
 import { Validation } from "@/types"
-import * as dhive from "@hiveio/dhive"
+import * as dhive from "../../lib/hive/dhive/lib"
 import CryptoJS from "crypto-js"
 import { VideoPart } from "../models/user"
 import { HiveAccount } from "../useHiveAuth"

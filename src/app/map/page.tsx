@@ -4,7 +4,7 @@ import { useHiveUser } from '@/contexts/UserContext';
 import { useComments } from '@/hooks/comments';
 import { vote } from '@/lib/hive/client-functions';
 import { Box, Divider, Flex, Heading, Image, Text, useBreakpointValue } from '@chakra-ui/react';
-import { Global } from '@emotion/react';
+// import { Global } from '@emotion/react';
 import Head from "next/head";
 import React, { useEffect, useMemo, useState } from 'react';
 import "../../styles/fonts.css";
@@ -63,65 +63,6 @@ const EmbeddedMap: React.FC = () => {
 
   return (
     <>
-      <Global
-        styles={`
-          @property --a {
-            syntax: "<angle>";
-            inherits: false;
-            initial-value: 135deg;
-          }
-
-          @keyframes bgrotate {
-            from {
-              --a: 135deg;
-            }
-            to {
-              --a: 315deg;
-            }
-          }
-
-          #animatedBox {
-            background-image: repeating-linear-gradient(var(--a), #198e2b, #7b9565 10vw);
-            animation-name: bgrotate;
-            animation-direction: alternate;
-            animation-iteration-count: infinite;
-            animation-duration: 30s;
-          }
-          #animatedBox2 {
-            background-image: repeating-linear-gradient(var(--a), #000000, #080808 10vw);
-            animation-name: bgrotate;
-            animation-direction: alternate-reverse;
-            animation-iteration-count: infinite;
-            animation-duration: 30s;
-          }
-
-          @keyframes float {
-            0% {
-              transform: translateY(0);
-            }
-            50% {
-              transform: translateY(5px);
-            }
-            100% {
-              transform: translateY(0);
-            }
-          }
-          @keyframes glow {
-            0% {
-              text-shadow: 0 0 5px black, 0 0 10px black, 0 0 15px black, 0 0 20px black, 0 0 25px black;
-              color: lime;
-            }
-            50% {
-              text-shadow: 0 0 10px lime, 0 0 20px lime, 0 0 30px lime, 0 0 40px lime, 0 0 50px lime;
-              color: black;
-            }
-            100% {
-              text-shadow: 0 0 5px black, 0 0 10px black, 0 0 15px black, 0 0 20px black, 0 0 25px black;
-              color: lime;
-            }
-          }
-        `}
-      />
       <Flex
         flexDirection="column"
         align="center"

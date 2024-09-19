@@ -23,7 +23,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import { Discussion } from "@hiveio/dhive";
+import { Discussion } from "../../../lib/hive/dhive/lib";
 import { memo, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import HTMLFlipBook from "react-pageflip";

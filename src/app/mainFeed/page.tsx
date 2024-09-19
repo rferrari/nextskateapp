@@ -22,7 +22,7 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import * as dhive from "@hiveio/dhive";
+import * as dhive from "../../lib/hive/dhive/lib";
 import { useMemo, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { FaHistory, FaImage, FaMoneyBill, FaTimes } from "react-icons/fa";
