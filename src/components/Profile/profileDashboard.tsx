@@ -119,14 +119,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                         <Box>
                             <Center mb={3}>
                                 <VStack>
-                                    <HStack>
-                                        <Text fontSize={'26px'}>
-                                            Total XP:
-                                        </Text>
-                                        <Tag bg={'limegreen'} color={'black'} fontSize={'26px'}> {userXp}/{availableXp}</Tag>
-                                    </HStack>
-                                    <ProfileCard user={user} />
-                                    <Button
+                                    <ProfileCard user={user} userXp={userXp} />
+                                    {/* <Button
                                         _hover={{ background: "transparent" }}
                                         leftIcon={<FaHive size={"22px"} />}
                                         color="yellow.200"
@@ -138,11 +132,17 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                                         onClick={handleUpdateXPClick}
                                     >
                                         Update XP
-                                    </Button>
+                                    </Button> */}
                                 </VStack>
                             </Center>
                         </Box>
                         <Box>
+                            <HStack>
+                                <Text fontSize={'26px'}>
+                                    Total XP:
+                                </Text>
+                                <Tag bg={'limegreen'} color={'black'} fontSize={'26px'}> {userXp}/{availableXp}</Tag>
+                            </HStack>
                             <LevelMissions user={user} initialLevel={userLevel + 1} updateAvailableXp={updateAvailableXp} />
                         </Box>
                     </Flex>

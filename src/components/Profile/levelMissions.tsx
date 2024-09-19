@@ -214,7 +214,7 @@ export default function LevelMissions({ initialLevel, user, updateAvailableXp }:
             </TableContainer>
 
             <Center mt={3}>
-                <Tag colorScheme="green" fontSize="24px">Recurring Tasks</Tag>
+                {/* <Tag colorScheme="green" fontSize="24px">Recurring Tasks</Tag> */}
             </Center>
 
             <TableContainer w="100%">
@@ -222,7 +222,7 @@ export default function LevelMissions({ initialLevel, user, updateAvailableXp }:
                     <Table variant="unstyled" mt={2} color="white" w="100%">
                         <Thead>
                             <Tr>
-                                <Th w="50%"> <Center> Task</Center></Th>
+                                <Th w="50%"> <Center> Recurring Tasks</Center></Th>
                                 <Th w="30%"> <Center> Action</Center></Th>
                             </Tr>
                         </Thead>
