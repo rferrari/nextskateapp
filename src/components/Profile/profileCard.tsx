@@ -7,9 +7,9 @@ import {
 import React, { useMemo, useState } from 'react';
 import { FaArrowDown, FaHive } from 'react-icons/fa';
 import { FaPencil } from "react-icons/fa6"
-import LoginModal from '../Hive/Login/LoginModal';
 import UserAvatar from '../UserAvatar';
 import useGnarsBalance from '@/hooks/useGnarsBalance';
+import LoginModal from '../Hive/Login/LoginModal';
 import EditInfoModal from "./EditInfoModal"
 import '../../styles/profile-card-styles.css';
 
@@ -79,20 +79,28 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
         // console.log("Profile updated");
     };
 
-    return (
+    return (<>
+        {isOpen &&
+            <EditInfoModal onUpdate={handleProfileUpdate} isOpen={isOpen}
+                onClose={onClose} user={user} />}
+
         <Flex justify="center" direction="column" width="full" height="full">
+            {/* Profile Card Container */}
             <Box id="containerCardProfile"
                 border="2px solid white"
                 borderRadius="20px"
                 position="relative" className={`level-${userLevel}`}
                 transition="0.6s"
                 transform={isFlipped ? 'rotateY(180deg)' : 'none'}
+                onClick={handleClick}
+                zIndex={1}
                 style={{
                     perspective: '1000px',
                     width: '310px',
                     height: '550px',
                 }}
             >
+                {/* Profile Card Front Side */}
                 <Card id="front-side-card" className={`card-profile level-${userLevel}`}
                     border="2px solid white"
                     size="sm"
@@ -101,9 +109,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                     borderRadius="20px"
                     position={'absolute'}
                     opacity={isFlipped ? '0' : '1'}
-                    onClick={handleClick}
+                // zIndex={isFlipped ? '1' : '0'}
+
                 >
-                    {/* Front side of the card */}
                     <CardHeader borderTopRadius="10px" textAlign="center" bg="transparent" p={2}>
                         <HStack justifyContent="space-between">
                             <HStack justifyContent="flex-start">
@@ -121,7 +129,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                         </HStack>
                     </CardHeader>
 
-                    <CardBody onClick={handleClick}
+                    <CardBody
+                        // onClick={handleClick}
                         cursor={'pointer'}
                         bg="transparent"
                     >
@@ -132,10 +141,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                                 </Box>
                             </Center>
                         </VStack>
-                    </CardBody>
 
-                    <CardFooter fontSize="16px" fontWeight="bold" color="white" mb={-2}>
-                        <VStack w="100%">
+                        <VStack w="100%" marginTop={5}>
                             <Box border="1px solid white"
                                 w={230} borderRadius="10px" p={2}
                                 bg="rgba(0, 0, 0, 0.8)">
@@ -165,10 +172,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                                     <Text cursor="pointer">{userVideoParts || 0}</Text>
                                 </HStack>
                             </Box>
-                            <CardFooter>
-                                <Flex justify="right">
+                        </VStack>
+                    </CardBody>
+
+                    <CardFooter fontSize="16px" fontWeight="bold" color="white" mb={-2}>
+                        <VStack w="100%">
+                            <Flex justify="center">
+                                <div style={{ zIndex: 10 }}>
                                     <Button
-                                        _hover={{ background: "transparent" }}
+                                        _hover={{ background: "black" }}
                                         color="white"
                                         border="1px solid white"
                                         width="100%"
@@ -181,7 +193,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                                         Edit
                                     </Button>
                                     <Button
-                                        _hover={{ background: "transparent" }}
+                                        _hover={{ background: "black" }}
                                         leftIcon={<FaHive size={"22px"} />}
                                         color="yellow.200"
                                         border={"1px solid white"}
@@ -193,8 +205,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                                     >
                                         Claim XP
                                     </Button>
-                                </Flex>
-                            </CardFooter>
+                                </div>
+                            </Flex>
                         </VStack>
                     </CardFooter>
                 </Card>
@@ -203,17 +215,21 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                 <Card id="back-side-card" className={`card-profile level-${userLevel}`}
                     border="2px solid white"
                     borderRadius="20px"
-                    transform={!isFlipped ? 'rotateY(180deg)' : 'none'}
+                    transform={'rotateY(0deg)'}
                     transition="0.6s"
+                    // opacity={'1'} 
                     opacity={isFlipped ? '1' : '0'}
-                    onClick={handleClick}
+                    zIndex={isFlipped ? '10' : '0'}
+                // onClick={handleClick}
                 >
                     <CardHeader
                         cursor={'pointer'}
                         // onClick={() => setIsFlipped(false)}
                         color="white"
-                        transform={isFlipped ? 'rotateY(180deg)' : 'rotateY(180deg)'}
+                        transform={'rotateY(180deg)'}
+                        // transform={isFlipped ? 'rotateY(180deg)' : 'rotateY(180deg)'}
                         style={{
+                            // backfaceVisibility: 'hidden',
                             backgroundImage: `url(${nextImage(userPostingMetadata?.profile?.cover_image || `https://images.ecency.com/webp/u/${user.name}/cover/small`)})`,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
@@ -229,20 +245,30 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                             <Text size="md" color="white"></Text>
                         </HStack>
                     </CardHeader>
-                    <CardBody transform={isFlipped ? 'rotateY(180deg)' : 'rotateY(180deg)'}
+
+                    <CardBody transform={'rotateY(180deg)'}
+                        //transform={isFlipped ? 'rotateY(180deg)' : 'rotateY(180deg)'}
                         // onClick={() => setIsFlipped(false)}
-                        textAlign="center" width="100%" height="100%" borderRadius="20px"
+                        textAlign="center"
+                        width="100%"
+                        height="100%"
+                        borderRadius="20px"
+                        padding={0}
+                        marginTop={5}
                     >
-                        <Center>
+                        {/* <Center> */}
+                        <HStack justify="center">
                             <Box border="1px solid white" w={230} borderRadius="10px" p={2}
                                 color={'white'}
                                 bg="rgba(0, 0, 0, 0.8)"
                             >
                                 {userPostingMetadata.profile?.about || "I'm too lazy to write a bio."}
                             </Box>
-                        </Center>
+                        {/* </Center> */}
+                        </HStack>
 
-                        <Center>
+                        <HStack justify="center">
+                        {/* <Center> */}
                             <Box border="1px solid white" w={230} borderRadius="10px" p={2} marginTop={5}
                                 color={'white'}
                                 bg="rgba(0, 0, 0, 0.8)"
@@ -251,20 +277,17 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                                     XP {userXp}
                                 </Text>
                             </Box>
-                        </Center>
-
+                        {/* </Center> */}
+                        </HStack>
                     </CardBody>
-                    <CardFooter transform={isFlipped ? 'rotateY(180deg)' : 'none'}
-                    >
-                        <Button leftIcon={<FaArrowDown />} size="sm" color={'white'} variant="outline" w="auto" onClick={() => setIsFlipped(false)}>
-                            Back
-                        </Button>
+
+                    <CardFooter transform={'rotateY(180deg)'}>
                     </CardFooter>
                 </Card>
 
             </Box>
-        </Flex>
-    );
+        </Flex >
+    </>);
 }
 
 export default ProfileCard;
