@@ -1,6 +1,6 @@
 import { voting_value2 } from "@/components/PostCard/calculateHiveVotingValueForHiveUser";
 import { HiveAccount } from "@/lib/useHiveAuth";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 
 export interface HiveUserContextProps {
   hiveUser: HiveAccount | null;
@@ -19,6 +19,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>();
   const [voteValue, setVoteValue] = useState<number>(0);
 
+  // const loadVoteValue = useCallback(async () => {
+  //   if (voteValue === 0) {
+  //     const value = await voting_value2(user);
+  //     setVoteValue(value);
+  //   }
+  // }, [])
+
   const loadVoteValue = async () => {
     if (voteValue === 0) {
       const value = await voting_value2(user);
@@ -35,11 +42,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    console.log("useEffect1 ", user );
     refreshUser();
     loadVoteValue();
   }, []);
 
   useEffect(() => {
+    console.log("useEffect2 ", user );
     if (user) {
       loadVoteValue()
     }
