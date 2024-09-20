@@ -28,7 +28,7 @@
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;      /* fix hack Safari  */ 
   transition: 0.6s;
-  transition: opacity 0.4s;                 /* fix hack  */
+  transition: opacity 0.7s;                 /* fix hack  */
   transition-delay: 0.2s;                   /* fix hack  */
   transform-style: 'preserve-3d';           /* fix hack  */
   transform: rotateY(180deg) translateZ(1px); /* Fix hack MUST have dont know why translateZ(1px) */
