@@ -57,8 +57,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
 
             {/* Profile Card Container */}
             <Box id="containerCardProfile"
-                border="2px solid white"
-                borderRadius="20px"
+                border="2px solid white"            // thick border to add with cards borders
+                borderRadius="20px"                 // adding 3d effect
                 position="relative" className={`level-${userLevel}`}
                 transition="0.6s"
                 transform={isFlipped ? 'rotateY(180deg) translateZ(1px)' : 'none'}
@@ -73,27 +73,29 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
             >
 
                 {/* Profile Card Front Side */}
-                <Card id="front-side-card" 
+                <Card id="front-side-card"
                     className={`front-card-profile`}
-                    border="2px solid white" 
-                    borderRadius="20px"
-                    bg={'transparent'} 
-                    color="white"
-                    position={'absolute'}
-                    transition="0.6s"
-                    opacity={isFlipped ? '0' : '1'}
-                    zIndex={isFlipped ? '0' : '2'}
+                    // border="2px solid white" 
+                    // borderRadius="20px"
+                    bg={'transparent'}                  // need to be here for chakra
+                    color="white"                       // ...
+                    position={'absolute'}               // do not remove
+                    transition="0.6s"                   // hack
+                    border="2px solid white"            // thick border to add with container borders
+                    borderRadius="20px"                 // adding 3d effect
+                    opacity={isFlipped ? '0' : '1'}     // display hide when flip
+                    zIndex={isFlipped ? '0' : '2'}      //  ...
                     style={{
-                        // backfaceVisibility: 'visible',  /* Changed to visible */
-                        // perspective: 'none',            /* Removed perspective */
+                        // backfaceVisibility: 'visible',  // Changed to visible   DONT need anymore?
+                        // perspective: 'none',            // Removed perspective  test smoth animation
                     }}
-
                 >
                     <CardHeader id='frontSideHeader'
                         borderTopRadius="10px"
                         textAlign="center"
                         bg="transparent"
                         p={2}
+                        borderBottom="1px solid white"
                         style={{ backfaceVisibility: 'hidden', }}
                     >
                         <HStack justifyContent="space-between">
@@ -118,16 +120,17 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                     >
                         <VStack>
                             <Center>
-                                <Box borderRadius={14} border="3px solid white">
-                                    <UserAvatar hiveAccount={user} borderRadius={10} boxSize={150} />
+                                <Box borderRadius={100} border="3px solid white">
+                                    <UserAvatar hiveAccount={user} borderRadius={100} boxSize={150} />
                                 </Box>
                             </Center>
                         </VStack>
 
                         <VStack w="100%" marginTop={5}>
-                            <Box border="1px solid white"
-                                w={230} borderRadius="10px" p={2}
-                                bg="rgba(0, 0, 0, 0.8)">
+                            <Box w={230}
+                                p={2}
+                                className={`box-level-${userLevel}`}
+                            >
                                 <HStack justify="space-between">
                                     <HStack>
                                         <Image src="/logos/hp_logo.png" alt="Logo" boxSize="20px" />
@@ -159,16 +162,16 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
 
                     <CardFooter id='frontSideFooter'
                         fontSize="16px" fontWeight="bold"
-                        color="white" mb={-2}
+                        color="white"
                         style={{ backfaceVisibility: 'hidden', }}
                     >
                         <VStack w="100%">
                             <Flex justify="center">
                                 <div style={{ zIndex: 10 }}>
-                                    <Button
-                                        _hover={{ background: "black" }}
-                                        color="white"
-                                        border="1px solid white"
+                                    <Button className={`box-level-${userLevel}`}
+                                        _hover={{ background: "black", color:"white!important" }}
+                                        // color="white"
+                                        // border="1px solid white"
                                         width="100%"
                                         leftIcon={<FaPencil size={"22px"} />}
                                         m={2}
@@ -177,20 +180,16 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                                         style={{
                                             backfaceVisibility: 'hidden',
                                             position: 'relative',
-                                            zIndex: 15      // button high above others divs
+                                            zIndex: 15              // button high above others divs
                                         }}
                                         onClick={(event) => {
                                             event.stopPropagation();
                                             onOpen();
                                         }}
-                                    >
-                                        Edit
-                                    </Button>
-                                    <Button
-                                        _hover={{ background: "black" }}
+                                    ></Button>
+                                    <Button className={`box-level-${userLevel}`}
+                                        _hover={{ background: "black", color:"white!important" }}
                                         leftIcon={<FaHive size={"22px"} />}
-                                        color="yellow"
-                                        border={"1px solid white"}
                                         width={"100%"}
                                         m={2}
                                         variant={"outline"}
@@ -198,7 +197,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                                         style={{
                                             backfaceVisibility: 'hidden',
                                             position: 'relative',
-                                            zIndex: 15      // button high above others divs
+                                            zIndex: 15              // button high above others divs
                                         }}
                                         onClick={(event) => {
                                             event.stopPropagation();
@@ -216,25 +215,35 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                 {/* Back side of the card */}
                 <Card id="back-side-card" className={`back-card-profile`}
                     position={'absolute'}
-                    color="white"                   //need to be here for chakra
-                    bg={'transparent'}              //need to be here for chakra
-                    opacity={isFlipped ? '1' : '0'}
-                    zIndex={isFlipped ? '2' : '0'}
+                    color="white"                       //move from css to here for chakra
+                    bg={'transparent'}                  //need to be here for chakra
+                    border="2px solid white"            // thick border to add with container borders
+                    borderRadius="20px"                 // adding 3d effect
+                    opacity={isFlipped ? '1' : '0'}     // visible when flipped
+                    zIndex={isFlipped ? '2' : '0'}      // send to back when flipped
                 >
+
                     <CardHeader id='backSideHeader'
-                            style={{
-                                backgroundImage: `url(${nextImage(userPostingMetadata?.profile?.cover_image || `https://images.ecency.com/webp/u/${user.name}/cover/small`)})`,
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                                borderBottom: '1px solid white',
-                                borderRadius: '10px',
-                                textAlign: 'center',
-                                backgroundColor: 'gray.900',
-                                padding: 2,
-                            }}>
-                        <HStack justify="center">
-                            <UserAvatar hiveAccount={user} borderRadius={100} boxSize={20} />
-                            <Text size="md" color="white"></Text>
+                        borderTopRadius="10px"
+                        textAlign="center"
+                        bg="transparent"
+                        p={2}
+                        borderBottom="1px solid white"
+                        style={{ backfaceVisibility: 'hidden', }}
+                    >
+                        <HStack justifyContent="space-between">
+                            <HStack justifyContent="flex-start">
+                                <Text fontWeight="bold" fontSize="18px"
+                                    textShadow="2px 2px 1px rgba(0,0,0,1)">
+                                    {user.name}
+                                </Text>
+                            </HStack>
+                            <Text fontWeight="bold" fontSize="18px">
+                                XP {userXp}
+                            </Text>
+                            <Text fontWeight="bold" fontSize="18px">
+                                Lvl {userLevel}
+                            </Text>
                         </HStack>
                     </CardHeader>
 
@@ -246,21 +255,42 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                         padding={0}
                         marginTop={5}
                     >
+                        <CardHeader id='backSideBodyHeader'
+                            style={{
+                                backgroundImage: `url(${nextImage(userPostingMetadata?.profile?.cover_image || `https://images.ecency.com/webp/u/${user.name}/cover/small`)})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                borderBottom: '1px solid white',
+                                borderRadius: '10px',
+                                textAlign: 'center',
+                                backgroundColor: 'gray.900',
+                                padding: '0.5em',
+                                margin: '2em 1em 2em 1em'
+                            }}>
+                            <HStack justify="center">
+                                <UserAvatar hiveAccount={user} borderRadius={100} boxSize={20} />
+                                <Text size="md" color="white"></Text>
+                            </HStack>
+                        </CardHeader>
+
                         <HStack justify="center">
-                            <Box border="1px solid white" w={230} borderRadius="10px"
+                            <Box className={`box-level-${userLevel}`} 
+                                w={230} 
+                                border="1px solid white" 
+                                borderRadius="10px"
                                 p={2}
-                                bg="rgba(0, 0, 0, 0.8)"
                             >
                                 {userPostingMetadata.profile?.about || "I'm too lazy to write a bio."}
                             </Box>
                         </HStack>
 
                         <HStack justify="center">
-                            <Box border="1px solid white" borderRadius="10px" 
+                            <Box className={`box-level-${userLevel}`}  
+                                border="1px solid white" 
+                                borderRadius="10px"
                                 w={230}
                                 p={2}
                                 marginTop={5}
-                                bg="rgba(0, 0, 0, 0.8)"
                             >
                                 <Text fontWeight="bold" fontSize="18px">
                                     XP {userXp}
