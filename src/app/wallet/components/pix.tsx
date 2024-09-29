@@ -26,7 +26,7 @@ import {
 import axios from "axios";
 import { QrCodePix } from 'qrcode-pix';
 import React, { useEffect, useState } from "react";
-import { fetchPixBeeData, formatCNPJ, formatCPF, formatRandomKey, formatTelephone, validateCPF, validatePhone } from "../utils/fetchPixBeeData";
+import { fetchPixBeeData, formatCNPJ, formatCPF, formatRandomKey, formatTelephone } from "../utils/fetchPixBeeData";
 import { LimitsTable } from "./LimitesTable";
 import SendHBDModal from "./sendHBDModal";
 interface PixBeeData {
@@ -62,66 +62,99 @@ interface PixBeeData {
     OurRefundPer: string;
     transactionFee: number;
     fixedFee: number;
+
 }
 interface PixProps {
     user: HiveAccount;
 }
+
+// type PIX_KEY_TYPE [
+//     DESCONHECIDO: "Desconhecido",
+//     CPF: "CPF",
+//     CPF: "CPF",
+//     CPF: "CPF",
+//     CPF: "CPF",
+// ]
+
 const Pix = ({ user }: PixProps) => {
-    const [userAmountHBD, setUserAmountHBD] = useState("");
+    const [isInBrazil, setIsInBrazil] = useState(false);
     const [isSell, setIsSell] = useState(true);
-    const [isExceeded, setIsExceeded] = useState(false);
-    const [pixbeeInputPixKey, setPixbeeInputPixKey] = useState<PixBeeData | null>(null);
-    const userHiveBalance = useHiveBalance(user);
-    const HBDAvailable = pixbeeInputPixKey ? parseFloat(pixbeeInputPixKey.balanceHbd) : 0;
+
+    const [error, setError] = useState<string | null>("Formulario em branco");
+    const [isExceeded, setIsExceeded] = useState(false);    // is greater than available pix balance
+    const [isLessMinimum, setIsLessMinimum] = useState(true);// is less then minimum
+    const [userHasBalance, setUserHasBalance] = useState(false);// is less then minimum
+
     const [displayModal, setDisplayModal] = useState(false);
+    const [userInputHBD, setUserInputHBD] = useState("");   // user input hbd value for pix
+    const userHiveBalance = useHiveBalance(user);
+    const [errorPixDeposit, setErrorPixDeposit] = useState<string | null>("");
+    const [qrCodeValue, setQrCodeValue] = useState<string | null>(null);
+    const [isInputDisabled, setIsInputDisabled] = useState(false);
+    const [isMinButtonDisabled, setIsMinButtonDisabled] = useState(false);
+    const [isHalfButtonDisabled, setIsHalfButtonDisabled] = useState(false);
+    const [isMaxButtonDisabled, setIsMaxButtonDisabled] = useState(false);
+    const [isSendButtonDisabled, setIsSendButtonDisabled] = useState(false);
+    const [pixbeeData, setPixbeeData] = useState<PixBeeData | null>(null);
     const [pixTotalPayment, setPixTotalPayment] = useState("0.000");
     const [pixKey, setPixKey] = useState("");
     const [userFormatedPixKey, setUserFormatedPixKey] = useState("");
-    const [pixKeyType, setPixKeyType] = useState("");
-    const [error, setError] = useState<string | null>(null);
-    const toast = useToast();
-    const [qrCodeValue, setQrCodeValue] = useState('');
-    const [isInBrazil, setIsInBrazil] = useState(false);
-    const [countdown, setCountdown] = useState<number>(30);
+    const [pixKeyType, setPixKeyType] = useState("Desconhecido");
     const [qrCodePayload, setQrCodePayload] = useState<string | null>(null);
-    // const [currentHBDPrice, setCurrentHBDPrice] = useState<number>(0);
-
-    // useEffect(() => {
-    //     const fetchPixBeeData = async () => {
-    //         try {
-    //             const response = await fetch('https://aphid-glowing-fish.ngrok-free.app/hbdticker');
-    //             const data = await response.json();
-    //             setPixBeeData(data);
-    //             setCurrentHBDPrice(parseFloat(data.HBDPriceBRL) || 0);
-    //         } catch (error) {
-    //             console.error("Failed to fetch updated PixBee data:", error);
-    //         }
-    //     };
-
-    //     const interval = setInterval(() => {
-    //         setCountdown(prevCountdown => prevCountdown - 1);
-    //     }, 1000);
-
-    //     if (countdown === 0) {
-    //         fetchPixBeeData();
-    //         setCountdown(30); // Reseta o countdown após a atualização
-    //     }
-
-    //     return () => clearInterval(interval);
-    // }, [countdown]);
+    const toast = useToast();
 
     useEffect(() => {
-        if (pixbeeInputPixKey && userHiveBalance) {
-            const isExceeded = parseFloat(userAmountHBD) > userHiveBalance.HBDUsdValue;
+        if (pixbeeData && userHiveBalance) {
+            const isExceeded = parseFloat(userInputHBD) > userHiveBalance.HBDUsdValue;
             setIsExceeded(isExceeded);
 
+            // console.log("setUserHasBalance "+setUserHasBalance)
+
             if (isExceeded) {
-                setError("O valor inserido excede o saldo disponível.");
+                setError("O valor inserido excede seu saldo disponível.");
             } else {
                 setError(null);
             }
         }
-    }, [userAmountHBD, pixbeeInputPixKey, userHiveBalance]);
+    }, [userInputHBD, pixbeeData, userHiveBalance]);
+
+
+    useEffect(() => {
+        if (pixbeeData && pixbeeData.depositMinLimit && userHiveBalance) {
+            const userHBDValue = parseFloat(userInputHBD);
+
+            const pixValue = calculateTotalPixPayment(userHBDValue);
+            const isLessMinimum = pixValue < pixbeeData.depositMinLimit;
+
+            setIsLessMinimum(isLessMinimum);
+
+            const exceedsBalance = userHBDValue > userHiveBalance.HBDUsdValue;
+
+            if (isLessMinimum) {
+                setError(`O valor inserido é menor que o limite mínimo de R$ ${pixbeeData.depositMinLimit}`);
+                setIsSendButtonDisabled(true);
+                setIsInputDisabled(false);
+                setIsMinButtonDisabled(false);
+                setIsHalfButtonDisabled(false);
+                setIsMaxButtonDisabled(false);
+            } else if (exceedsBalance) {
+                setError("O valor inserido excede o saldo disponível.");
+                setIsSendButtonDisabled(true);
+                setIsInputDisabled(false);
+                setIsMinButtonDisabled(false);
+                setIsHalfButtonDisabled(false);
+                setIsMaxButtonDisabled(false);
+            } else {
+                setError(null);
+                setIsSendButtonDisabled(false);
+                setIsInputDisabled(false);
+                setIsMinButtonDisabled(false);
+                setIsHalfButtonDisabled(false);
+                setIsMaxButtonDisabled(false);
+            }
+        }
+    }, [userInputHBD, pixbeeData, userHiveBalance]);
+
     useEffect(() => {
         const checkLocation = async () => {
             try {
@@ -138,7 +171,7 @@ const Pix = ({ user }: PixProps) => {
     useEffect(() => {
         if (isInBrazil) {
             fetchPixBeeData().then((data) => {
-                setPixbeeInputPixKey(data);
+                setPixbeeData(data);
             }).catch(error => {
                 console.error("Failed to fetch PixBee data:", error);
             });
@@ -147,23 +180,46 @@ const Pix = ({ user }: PixProps) => {
     useEffect(() => {
         const generateQrCode = async () => {
             try {
-                if (!pixbeeInputPixKey?.pixbeePixKey) {
-                    throw new Error('Chave PIX não definida.');
-                }
-                if (!userAmountHBD || isNaN(parseFloat(userAmountHBD))) {
-                    throw new Error('Quantidade HBD inválida.');
+                if (!pixbeeData?.pixbeePixKey) {
+                    setErrorPixDeposit('Chave PIX não definida.');
+                    setQrCodeValue(null);
+                    setQrCodePayload(null);
+                    return;
                 }
 
-                const valueHBD = parseFloat(userAmountHBD);
-                const valueBRL = parseFloat((valueHBD * parseFloat(pixbeeInputPixKey.HBDPriceBRL)).toFixed(2));
+                if (!userInputHBD || isNaN(parseFloat(userInputHBD))) {
+                    setErrorPixDeposit('Coloque um valor desejável.');
+                    setQrCodeValue(null);
+                    setQrCodePayload(null);
+                    return;
+                }
 
-                console.log('Chave PIX:', pixbeeInputPixKey?.pixbeePixKey);
-                console.log('Quantidade HBD:', userAmountHBD);
+                const valueHBD = parseFloat(userInputHBD);
+                const balance = parseFloat(pixbeeData.balanceHbd);
+
+                if (valueHBD <= 0) {
+                    setErrorPixDeposit('Valor de HBD deve ser maior que zero.');
+                    setQrCodeValue(null);
+                    setQrCodePayload(null);
+                    return;
+                }
+
+                if (valueHBD > balance) {
+                    setErrorPixDeposit('Não temos esse valor disponível na Skatebank.');
+                    setQrCodeValue(null);
+                    setQrCodePayload(null);
+                    return;
+                }
+
+                const valueBRL = parseFloat((valueHBD * parseFloat(pixbeeData.HBDPriceBRL)).toFixed(2));
+
+                console.log('Chave PIX:', pixbeeData?.pixbeePixKey);
+                console.log('Quantidade HBD:', userInputHBD);
                 console.log('Valor em BRL:', valueBRL);
 
                 const qrCodePix = QrCodePix({
                     version: '01',
-                    key: pixbeeInputPixKey?.pixbeePixKey || '',
+                    key: pixbeeData?.pixbeePixKey,
                     name: "PixBee",
                     city: '',
                     message: `${user.name}`,
@@ -183,32 +239,53 @@ const Pix = ({ user }: PixProps) => {
 
                 if (qrCodeBase64 && qrCodeBase64.startsWith('data:image/png;base64,')) {
                     setQrCodeValue(qrCodeBase64);
+                    setErrorPixDeposit(null);
                 } else {
-                    throw new Error('QR code Base64 string inválido.');
+                    setErrorPixDeposit('QR code Base64 string inválido.');
+                    setQrCodeValue(null);
+                    setQrCodePayload(null);
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Erro ao gerar QR code PIX:', error);
+                setErrorPixDeposit(error.message);
+                setQrCodeValue(null);
+                setQrCodePayload(null);
             }
         };
 
         if (!isSell) {
             generateQrCode();
         }
-    }, [userAmountHBD, pixbeeInputPixKey?.pixbeePixKey, user.name, isSell]);
-    useEffect(() => {
-        fetchPixBeeData().then((data) => {
-            setPixbeeInputPixKey(data);
-        }).catch(error => {
-            console.error("Failed to fetch PixBee data:", error);
-        });
-    }, []);
-    const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.target.value;
-        setUserAmountHBD(value);
-        const parsedValue = parseFloat(value);
-        setIsExceeded(parsedValue > HBDAvailable);
+    }, [userInputHBD, pixbeeData?.pixbeePixKey, user.name, isSell, pixbeeData?.HBDPriceBRL, userHiveBalance.HBDUsdValue]);
+
+    const formatValue = (value: string): string => {
+        // Remove qualquer caractere não numérico ou ponto
+        const sanitizedValue = value.replace(/[^0-9.]/g, '');
+
+        // Divide a parte inteira e decimal
+        const [integerPart, decimalPart] = sanitizedValue.split('.');
+
+        // Formata a parte inteira com separadores de milhar
+        const formattedIntegerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+        // Limita a parte decimal a 3 dígitos e adiciona zeros se necessário
+        const formattedDecimalPart = decimalPart ? decimalPart.slice(0, 3) : '000';
+
+        // Retorna a string formatada apenas se houver parte decimal
+        return decimalPart ? `${formattedIntegerPart}.${formattedDecimalPart}` : formattedIntegerPart;
     };
-    const isBlurred = !userAmountHBD || parseFloat(userAmountHBD) > HBDAvailable;
+
+
+    const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const rawValue = event.target.value;
+        const formattedValue = formatValue(rawValue);
+
+        setUserInputHBD(formattedValue);
+        const parsedValue = parseFloat(formattedValue);
+        setIsExceeded(parsedValue > parseFloat(pixbeeData ? pixbeeData.balanceHbd : "0"));
+    };
+
+    const isBlurred = !userInputHBD || parseFloat(userInputHBD) > parseFloat(pixbeeData ? pixbeeData.balanceHbd : "0");
     const handlePixKeyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value.replace(/[^\d\w@.]/g, '');
 
@@ -237,6 +314,7 @@ const Pix = ({ user }: PixProps) => {
                 pixKeyType = "Chave Aleatória";
                 sanitizedPixKey = formatRandomKey(value);
             } else {
+                setError("Chave Pix inválida");
                 throw new Error("Chave Pix inválida");
             }
         } catch (error) {
@@ -250,16 +328,18 @@ const Pix = ({ user }: PixProps) => {
         setUserFormatedPixKey(sanitizedPixKey);
         setError(null);
     };
+
     function calculateLiquidDeposit(realValue: number): number {
-        if (!pixbeeInputPixKey) {
+        if (!pixbeeData) {
             throw new Error('PixBeeData não está definido');
         }
-        const exchangePer = pixbeeInputPixKey.OurExchangePer || 0;
-        const exchangeFee = pixbeeInputPixKey.OurExchangeFee || 0;
+        const exchangePer = pixbeeData.OurExchangePer;
+        const exchangeFee = pixbeeData.OurExchangeFee;
         return parseFloat((realValue * (1 - exchangePer) - exchangeFee).toFixed(2));
     }
+
     function findBruteValue(liquidPlusTax: number, valorPix: number, token: string): number {
-        if (!pixbeeInputPixKey) {
+        if (!pixbeeData) {
             throw new Error('PixBeeData não está definido');
         }
 
@@ -268,7 +348,7 @@ const Pix = ({ user }: PixProps) => {
         let countWhile = 0;
 
         if (token === "" || token === "HBD") {
-            const hbdPriceBRL = parseFloat(pixbeeInputPixKey.HBDPriceBRL);
+            const hbdPriceBRL = parseFloat(pixbeeData.HBDPriceBRL);
             brutoDeposit = liquidPlusTax / hbdPriceBRL;
 
             while (calculateLiquidDeposit(brutoDeposit) < valorPix) {
@@ -286,86 +366,99 @@ const Pix = ({ user }: PixProps) => {
 
         throw new Error('Token não suportado');
     }
+
     const calculateBruteValue = (valorPix: number, token: string): number => {
-        if (!pixbeeInputPixKey) {
+        if (!pixbeeData) {
             throw new Error('PixBeeData não está definido');
         }
-        const exchangeFee = pixbeeInputPixKey.OurExchangeFee || 0;
-        const exchangePer = parseFloat(pixbeeInputPixKey.OurExchangePer.toString()) || 0;
+        const exchangeFee = pixbeeData.OurExchangeFee || 0;
+        const exchangePer = parseFloat(pixbeeData.OurExchangePer.toString());
         let liquidplustax = valorPix + exchangeFee;
         liquidplustax = liquidplustax * (1 + exchangePer);
         let bruteValue = findBruteValue(liquidplustax, valorPix, token);
-        return bruteValue / parseFloat(pixbeeInputPixKey.HBDPriceBRL);
+        return bruteValue / parseFloat(pixbeeData.HBDPriceBRL);
     };
+
     const calculateMinimumHBDAmount = (): number | undefined => {
-        if (pixbeeInputPixKey && pixbeeInputPixKey.HBDPriceBRL) {
-            const MINIMUM_PIX_VALUE_BRL = pixbeeInputPixKey.depositMinLimit || 0;
+        if (pixbeeData && pixbeeData.HBDPriceBRL) {
+            const MINIMUM_PIX_VALUE_BRL = pixbeeData.depositMinLimit || 0;
             return calculateBruteValue(MINIMUM_PIX_VALUE_BRL, "HBD");
         }
         return undefined;
     };
+
     const setMinAmount = () => {
         const minHBD = calculateMinimumHBDAmount();
         console.log("Valor mínimo HBD: setMinAmount");
         if (minHBD !== undefined) {
-            setUserAmountHBD(minHBD.toFixed(3));
-            setIsExceeded(parseFloat(minHBD.toFixed(3)) > HBDAvailable);
+            setUserInputHBD(minHBD.toFixed(3));
+            setIsExceeded(parseFloat(minHBD.toFixed(3)) > userHiveBalance.HBDUsdValue);
         }
-        countdown
     };
+
+    const setMaxAmount = () => {
+        console.log("Valor máximo HBD: setMaxAmount");
+        setUserInputHBD(userHiveBalance.HBDUsdValue.toFixed(3));
+        setIsExceeded(false);
+    }
+
+    const setHalfAmount = () => {
+        console.log("Valor médio HBD: setHalfAmount");
+        const halfAmount = userHiveBalance.HBDUsdValue / 2;
+        setUserInputHBD(halfAmount.toFixed(3));
+        setIsExceeded(false);
+    };
+
     const handleSubmit = () => {
-        try {
-            let isValidKey = false;
-    
-            // Validando os diferentes tipos de chave Pix
-            if (pixKeyType === "CPF") {
-                isValidKey = validateCPF(pixKey);
-            } else if (pixKeyType === "Telefone") {
-                isValidKey = validatePhone(pixKey);
-            } else if (["CNPJ", "Email", "Chave Aleatória"].includes(pixKeyType)) {
-                isValidKey = true;
-            }
-    
-            if (!isValidKey) {
-                throw new Error("Chave Pix inválida. Por favor, verifique os dados inseridos.");
-            }
-    
-            // Se a chave for válida, exibe o modal
-            setDisplayModal(true);
-            setError(null);
-        } catch (error: any) {
-            setError(error.message);
-            toast({
-                title: 'Erro',
-                description: error.message,
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            });
+        console.log("verificacoes");
+        console.log("pixKeyType!=Desconhecido " + pixKeyType);
+        // console.log("userHasBalance "           + userHasBalance);
+        console.log("isLessMinimum " + isLessMinimum);
+        console.log("error === null " + error);
+
+        if ((!isExceeded)
+            && (pixKeyType != "Desconhecido")
+            && (!isLessMinimum)
+            && ((error === null))
+        ) setDisplayModal(true);
+        else {
+            throw new Error("Confira os valores inseridos.");
         }
     };
-    
-    function calculateTotalPixPayment(amount: number) {
-        if (!pixbeeInputPixKey) {
+
+    function calculateTotalPixPayment(amountHBD: any): number {
+        if (!pixbeeData) {
             throw new Error('PixBeeData não está definido');
         }
 
-        const hbdtoBrl = parseFloat(pixbeeInputPixKey.HBDPriceBRL);
-        const fee = (hbdtoBrl * amount) * 0.01 + 2;
-        const totalPayment = hbdtoBrl * amount - fee;
-
-        return totalPayment.toLocaleString('pt-BR', {
-            style: 'currency',
-            currency: 'PIX',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        });
-    }
-    useEffect(() => {
-        if (userAmountHBD) {
-            setPixTotalPayment(calculateTotalPixPayment(parseFloat(userAmountHBD)));
+        try {
+            amountHBD = parseFloat(amountHBD);
+            const hbdtoBrl = parseFloat(pixbeeData.HBDPriceBRL);
+            const fee = (hbdtoBrl * amountHBD) * 0.01 + 2;
+            var totalPayment = hbdtoBrl * amountHBD - fee;
+            if (totalPayment < 0) totalPayment = 0;
+            return parseFloat(totalPayment.toFixed(2));
+        } catch {
+            console.log("amountn HBD nao eh numero valido");
+            return 0;
         }
-    }, [userAmountHBD, pixbeeInputPixKey]);
+    }
+
+    useEffect(() => {
+        if (userInputHBD) {
+            var pix = calculateTotalPixPayment(userInputHBD);
+            const pixTotal = pix.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'PIX',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            });
+            setPixTotalPayment(pixTotal);
+        } else {
+            setPixTotalPayment("PIX 0.00");
+        }
+    }, [userInputHBD, pixbeeData]);
+
     const handleCopy = () => {
         if (qrCodePayload) {
             navigator.clipboard.writeText(qrCodePayload).then(() => {
@@ -385,7 +478,7 @@ const Pix = ({ user }: PixProps) => {
             </Center>
         );
     }
-    if (!pixbeeInputPixKey) {
+    if (!pixbeeData) {
         return (
             <Center>
                 <Text color={'limegreen'}>Call Vaipraonde in Discord and ask him to turn on his raspberry...</Text>
@@ -394,14 +487,14 @@ const Pix = ({ user }: PixProps) => {
     }
     return (
         <>
-            <Center mt="20px">
+            <Center mt="20px"  >
                 <Container maxW="container.lg">
                     <VStack mt={1} spacing={4} flexDirection={{ base: "column", xl: "row" }}>
-                        <Card w="full" height={"700px"} fontFamily={'Joystix'}>
+                        <Card w="100%" fontFamily={'Joystix'} bg="black" border="1px solid white">
                             <CardHeader>
                                 <Center>
                                     <VStack spacing={2}>
-                                        <Text fontSize="lg">
+                                        <Text fontSize="lg" color="white">
                                             {isSell ? "Sacar usando PIX:" : "Depositar usando Pix:"}
                                         </Text>
                                         <Switch
@@ -416,89 +509,206 @@ const Pix = ({ user }: PixProps) => {
                                 <VStack spacing={4}>
                                     {isSell ? (
                                         <>
-                                            <Text> Seu Saldo disponível: {userHiveBalance.HBDUsdValue} HBD</Text>
-                                            <Image width={'70%'} src={"/logos/HBD-Pix.png"} alt="PixBee" />
+                                            <Text
+                                                color="white"
+                                                fontSize={{ base: "sm", md: "md" }}
+                                                textAlign="center"
+                                                mb={4}
+                                            >
+                                                Seu Saldo disponível: {userHiveBalance.HBDUsdValue} HBD
+                                            </Text>
+
                                             <Input
-                                                placeholder="Digite sua chave pix"
+                                                placeholder="Digite sua chave PIX"
                                                 value={userFormatedPixKey}
                                                 onChange={handlePixKeyChange}
+                                                sx={{
+                                                    '::placeholder': { color: 'white' },
+                                                }}
+                                                color="white"
+                                                fontSize={{ base: "sm", md: "md" }}
+                                                mb={4}
+                                                w="100%"
+                                                borderColor="limegreen"
+                                                _hover={{ borderColor: "white" }}
+                                                _focus={{ borderColor: "limegreen", boxShadow: "0 0 0 1px limegreen" }}
                                             />
+
                                             {pixKeyType && (
-                                                <Badge colorScheme="blue" mt={2}>
+                                                <Badge colorScheme="blue" mt={2} fontSize={{ base: "xs", md: "sm" }}>
                                                     {pixKeyType}
                                                 </Badge>
                                             )}
-                                            <InputGroup>
+
+                                            <InputGroup
+                                                display="flex"
+                                                alignItems="center"
+                                                justifyContent="space-between" 
+                                                w="100%"
+                                               
+                                            >
                                                 <Input
-                                                    placeholder="Digite a quantidade de"
-                                                    value={userAmountHBD}
+                                                    placeholder="0.000"
+                                                    value={userInputHBD}
                                                     onChange={handleAmountChange}
-                                                    type="number"
+                                                    type="text"
+                                                    sx={{
+                                                        '::placeholder': { color: 'white' },
+                                                    }}
+                                                    color="white"
+                                                    borderColor="limegreen"
+                                                    _hover={{ borderColor: "white" }}
+                                                    _focus={{ borderColor: "limegreen", boxShadow: "0 0 0 1px limegreen" }}
+                                                    flex="1" 
+                                                    
+                                                    isDisabled={isInputDisabled}
                                                 />
-                                                <InputRightAddon color={'red'}>
+                                                <InputRightAddon
+                                                    color="white"
+                                                    bg="black"
+                                                    borderColor="limegreen"
+                                                    px={4}
+                                                    fontSize={{ base: "sm", md: "md" }}
+                                                    w="auto"
+                                                    flexShrink={0}
+                                                >
                                                     HBD
                                                 </InputRightAddon>
                                             </InputGroup>
-                                            {userAmountHBD && (
-                                                <Badge colorScheme="green" fontSize="3xl" variant="outline" w={'full'}
-                                                ><Text textAlign="center">
-                                                        {pixTotalPayment}
-                                                    </Text>
-                                                </Badge>
-                                            )}
-                                            <HStack spacing={4} mt={4}>
-                                                <Button colorScheme="blue" onClick={setMinAmount}>
-                                                    Mínimo
+
+                                            <HStack
+                                                justifyContent="space-between"
+                                                flexDirection="row"
+                                            >
+                                                <Button
+                                                    onClick={setMinAmount}
+                                                    color="limegreen"
+                                                    bg="black"
+                                                    fontSize={{ base: "xs", md: "sm" }}
+                                                    _hover={{ color: "limegreen", bg: "black" }}
+                                                    _active={{ color: "limegreen", bg: "black" }}
+                                                    _focus={{ color: "limegreen", bg: "black" }}
+                                                    isDisabled={isMinButtonDisabled}
+                                                    w={{ base: "32%", md: "auto" }}
+                                                >
+                                                    Mín
                                                 </Button>
-                                                {/* <p> {countdown} </p> */}
+                                                <Button
+                                                    onClick={setHalfAmount}
+                                                    color="limegreen"
+                                                    bg="black"
+                                                    fontSize={{ base: "xs", md: "sm" }}
+                                                    _hover={{ color: "limegreen", bg: "black" }}
+                                                    _active={{ color: "limegreen", bg: "black" }}
+                                                    _focus={{ color: "limegreen", bg: "black" }}
+                                                    isDisabled={isHalfButtonDisabled}
+                                                    w={{ base: "32%", md: "auto" }}
+                                                >
+                                                    Méd
+                                                </Button>
+                                                <Button
+                                                    onClick={setMaxAmount}
+                                                    color="limegreen"
+                                                    bg="black"
+                                                    fontSize={{ base: "xs", md: "sm" }}
+                                                    _hover={{ color: "limegreen", bg: "black" }}
+                                                    _active={{ color: "limegreen", bg: "black" }}
+                                                    _focus={{ color: "limegreen", bg: "black" }}
+                                                    isDisabled={isMaxButtonDisabled}
+                                                    w={{ base: "32%", md: "auto" }}
+                                                >
+                                                    Max
+                                                </Button>
                                             </HStack>
+
+                                            <Badge
+                                                colorScheme="green"
+                                                fontSize={{ base: "xl", md: "2xl" }}
+                                                variant="outline"
+                                                w="100%"
+                                                textAlign="center"
+                                                py={2}
+                                                mb={4}
+                                            >
+                                                {pixTotalPayment}
+                                            </Badge>
+
                                             {error && (
-                                                <Text color="red.500">{error}</Text>
+                                                <Text color="red.500" mt={2} fontSize={{ base: "sm", md: "md" }}>
+                                                    {error}
+                                                </Text>
                                             )}
 
-                                            <Button w={'100%'} variant={'outline'} colorScheme="red" onClick={handleSubmit}>
+                                            <Button
+                                                w="100%"
+                                                variant="outline"
+                                                color="limegreen"
+                                                onClick={handleSubmit}
+                                                fontSize={{ base: "sm", md: "md" }}
+                                                mt={4}
+                                                _hover={{ color: "limegreen", bg: "black" }}
+                                                _active={{ color: "limegreen", bg: "black" }}
+                                                _focus={{ color: "limegreen", bg: "black" }}
+                                                isDisabled={isSendButtonDisabled || userInputHBD === "" || parseFloat(userInputHBD) > userHiveBalance.HBDUsdValue}
+                                            >
                                                 Enviar Hive Dollars
                                             </Button>
                                         </>
-                                    ) : (
-                                        <>
-                                            <Image width={'70%'} src="/logos/Pix-hbd.png" alt="PixBee" />
-                                            <Box filter={isBlurred ? "blur(5px)" : "none"}>
-                                                {qrCodeValue ? (
-                                                    <Image src={qrCodeValue} alt="QR Code" />
-                                                ) : (
-                                                    <Text >Loading QR Code...</Text>
-                                                )}
-                                            </Box>
-                                            {qrCodePayload && (
-                                                <Box mt={4}>
-                                                    <Button colorScheme="blue" onClick={handleCopy} filter={isBlurred ? "blur(5px)" : "none"}
-                                                        isDisabled={isBlurred}>
-                                                        PIX Copia e Cola
-                                                    </Button>
+
+                                    ) :
+                                        (
+                                            <>
+                                                <Box filter={isBlurred ? "blur(5px)" : "none"}>
+                                                    {qrCodeValue ? (
+                                                        <Image src={qrCodeValue} alt="QR Code" />
+                                                    ) : (
+                                                        <Text >Loading QR Code...</Text>
+                                                    )}
                                                 </Box>
-                                            )}
-                                            <Input
-                                                placeholder="Digite a quantidade de HBD"
-                                                value={userAmountHBD}
-                                                onChange={handleAmountChange}
-                                            />
-                                        </>
-                                    )}
+                                                {qrCodePayload && (
+                                                    <Box mt={4}>
+                                                        <Button colorScheme="blue" onClick={handleCopy} filter={isBlurred ? "blur(5px)" : "none"} isDisabled={isBlurred}>
+                                                            PIX Copia e Cola
+                                                        </Button>
+                                                    </Box>
+                                                )}
+                                                {errorPixDeposit && (
+                                                    <Text color="red.500" mt={2}>
+                                                        {errorPixDeposit}
+                                                    </Text>
+                                                )}
+                                                <Input
+                                                    placeholder="Digite a quantidade de HBD"
+                                                    value={userInputHBD}
+                                                    onChange={handleAmountChange}
+                                                    sx={{
+                                                        '::placeholder': {
+                                                            color: 'white',
+                                                        },
+                                                    }}
+                                                    color="white"
+                                                />
+                                            </>
+                                        )}
                                 </VStack>
                             </CardBody>
                         </Card>
-                        {pixbeeInputPixKey && <LimitsTable {...pixbeeInputPixKey} />}
+                        {pixbeeData &&
+                            <LimitsTable
+                                balancePix={pixbeeData.balancePix}
+                                balanceHbd={pixbeeData.balanceHbd}
+                                depositMinLimit={pixbeeData.depositMinLimit}
+                                OurExchangePer={pixbeeData.OurExchangePer}
+                                OurExchangeFee={pixbeeData.OurExchangeFee}
+                            />}
                         {displayModal && (
                             <SendHBDModal
                                 username={user.name}
-                                visible={displayModal}
-                                onClose={() => setDisplayModal(false)}
-                                userAmountHBD={userAmountHBD}
-                                pixAmountBRL={parseFloat(pixTotalPayment)}
+                                userInputHBD={userInputHBD}
                                 memo={userFormatedPixKey || ''}
-                                availableBalance={HBDAvailable}
-                                hbdToBrlRate={parseFloat(pixbeeInputPixKey?.HBDPriceBRL) || 0}
+                                valueTotalPIX={pixTotalPayment.toString()}
+                                onClose={() => setDisplayModal(false)}
+                                visible={displayModal}
                             />
                         )}
                     </VStack>

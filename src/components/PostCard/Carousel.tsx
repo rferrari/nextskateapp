@@ -63,7 +63,6 @@ function PostCarousel() {
       carouselRef.current.next()
     }
   }
-
   return (
     <div style={{ justifyContent: "center" }}>
       <Box m={2} height={"auto"}>

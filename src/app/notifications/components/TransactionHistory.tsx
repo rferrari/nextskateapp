@@ -1,8 +1,8 @@
-import { Button, Flex, Spinner, Stack, StackDivider, Text, Container, Tabs, TabList, TabPanels, Tab, TabPanel, HStack, Image } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import AuthorAvatar from "@/components/AuthorAvatar";
 import { useHiveUser } from "@/contexts/UserContext";
 import { getAccountHistory } from "@/lib/hive/client-functions";
-import AuthorAvatar from "@/components/AuthorAvatar";
+import { Button, Container, Flex, HStack, Image, Spinner, Stack, StackDivider, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import { FaHive } from "react-icons/fa";
 
 export interface Transaction {
@@ -68,7 +68,7 @@ const TransactionHistory = () => {
                     <HStack key={index} p={4} borderBottom="1px solid gray">
                         <Image src={CLAIM_REWARDS_IMAGE} boxSize={10} />
                         <Text fontSize="lg">
-                            Claim Reward: {details.reward_hbd}, {details.reward_hive}, {details.reward_vests}
+                            Claim Reward: {details.reward_hbd} and {details.reward_vests}
                         </Text>
                     </HStack>
                 );
@@ -120,7 +120,13 @@ Comment by {details.author}: {details.body}
                     <HStack key={index} p={4} borderBottom="1px solid gray">
                         <AuthorAvatar username={details.voter} boxSize={10} />
                         <Text fontSize="lg">
-Vote by {details.voter} on {details.author}&apos;s <a href={`https://skatehive.app/post/@${details.author}/${details.permlink}`} target="_blank" rel="noopener noreferrer" >post</a>. Weight: {details.weight/100}&#37;
+                            Vote by {details.voter} on {details.author}s
+
+                            <a href={`https://skatehive.app/post/@${details.author}/${details.permlink}`} target="_blank" rel="noopener noreferrer" >
+                                post
+                            </a>
+
+                            Weight: {(details.weight / 100).toFixed(2)}%
                         </Text>
                     </HStack>
                 );
@@ -129,7 +135,11 @@ Vote by {details.voter} on {details.author}&apos;s <a href={`https://skatehive.a
                     <HStack key={index} p={4} borderBottom="1px solid gray">
                         <AuthorAvatar username={details.benefactor} boxSize={10} />
                         <Text fontSize="lg">
-Benefactor Reward for {details.benefactor} on <a href={`https://skatehive.app/post/@${details.author}/${details.permlink}`} target="_blank" rel="noopener noreferrer"> {details.author}&apos;s comment</a>. {details.hbd_payout} HBD, {details.hive_payout} HIVE, {details.vesting_payout} VESTS
+                            Benefactor Reward for {details.benefactor} on
+                            <a href={`https://skatehive.app/post/@${details.author}/${details.permlink}`} target="_blank" rel="noopener noreferrer">
+                                {details.author}&apos;s comment
+                            </a>
+                            : {details.hbd_payout} HBD, {details.hive_payout} HIVE, {details.vesting_payout} VESTS
                         </Text>
                     </HStack>
                 );

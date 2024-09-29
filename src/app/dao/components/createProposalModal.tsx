@@ -4,6 +4,7 @@ import {
     Box,
     Button,
     HStack,
+    Text,
     VStack, useBreakpointValue
 } from "@chakra-ui/react";
 import { Web3Provider } from '@ethersproject/providers';
@@ -33,8 +34,6 @@ const CreateProposalModal = ({ connectedUserAddress }: CreateProposalModalProps)
         setCurrentBlockNumber(blockNumber);
     };
 
-
-
     const fetchSpaceInfo = async () => {
         try {
             const response = await fetch('https://hub.snapshot.org/api/spaces/skatehive.eth');
@@ -55,11 +54,19 @@ const CreateProposalModal = ({ connectedUserAddress }: CreateProposalModalProps)
 
     return (
         <Box
-            height={"100vh"}
         >
+            {isConfirmationModalOpen && (
+                <CreateProposalConfirmationModal
+                    proposalBody={value}
+                    isOpen={isConfirmationModalOpen}
+                    connectedUserAddress={connectedUserAddress}
+                    onClose={() => setIsConfirmationModalOpen(false)}
+                    title={title}
+                />
+            )}
             {useBreakpointValue({
                 base: (
-                    <VStack spacing="4">
+                    <VStack spacing="4" w={'100%'} p={0}>
                         <ProposalEditor
                             value={value}
                             setValue={setValue}
@@ -68,7 +75,27 @@ const CreateProposalModal = ({ connectedUserAddress }: CreateProposalModalProps)
                             setIsUploading={setIsUploading}
                             PINATA_GATEWAY_TOKEN={PINATA_GATEWAY_TOKEN}
                         />
+
+
+                        {title !== "" ? (
+                            <Text color={"white"}>
+                                {title}
+                            </Text>
+                        ) : (
+                            <Text color={"white"}>Proposal Preview</Text>
+                        )}
                         <ProposalPreview value={value} />
+                        <Button
+                            width={"100%"}
+                            mt={4}
+                            colorScheme="green"
+                            variant={"outline"}
+                            onClick={() => {
+                                setIsConfirmationModalOpen(true);
+                            }}
+                        >
+                            Create Proposal
+                        </Button>
                     </VStack>
                 ),
                 md: (
@@ -82,46 +109,49 @@ const CreateProposalModal = ({ connectedUserAddress }: CreateProposalModalProps)
                                 setIsUploading={setIsUploading}
                                 PINATA_GATEWAY_TOKEN={PINATA_GATEWAY_TOKEN}
                             />
+                            <Button
+                                width={"100%"}
+                                mt={4}
+                                colorScheme="green"
+                                variant={"outline"}
+                                onClick={() => {
+                                    setIsConfirmationModalOpen(true);
+                                }}
+                            >
+                                Create Proposal
+                            </Button>
+                            <Button
+                                width={"100%"}
+                                mt={4}
+                                colorScheme="green"
+                                variant={"outline"}
+                                onClick={() => {
+                                    console.log(spaceInfo);
+                                }}
+                            >
+                                Log Space Details
+                            </Button>
                         </Box>
                         <Box
-                            width="50%">
+                            width="50%"
+                        >
+                            {title !== "" ? (
+                                <Text color={"white"}>
+                                    {title}
+                                </Text>
+                            ) : (
+                                <Text color={"white"}>Proposal Preview</Text>
+                            )}
+
+
                             <ProposalPreview value={value} />
                         </Box>
                     </HStack>
                 )
 
             })}
-            <Button
-                width={"100%"}
-                mt={4}
-                colorScheme="green"
-                variant={"outline"}
-                onClick={() => {
-                    setIsConfirmationModalOpen(true);
-                }}
-            >
-                Create Proposal
-            </Button>
-            <Button
-                width={"100%"}
-                mt={4}
-                colorScheme="green"
-                variant={"outline"}
-                onClick={() => {
-                    console.log(spaceInfo);
-                }}
-            >
-                Log Space Details
-            </Button>
-            {isConfirmationModalOpen && (
-                <CreateProposalConfirmationModal
-                    proposalBody={value}
-                    isOpen={isConfirmationModalOpen}
-                    connectedUserAddress={connectedUserAddress}
-                    onClose={() => setIsConfirmationModalOpen(false)}
-                    title={title}
-                />
-            )}
+
+
         </Box>
     );
 };

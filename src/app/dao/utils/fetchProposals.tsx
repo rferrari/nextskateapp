@@ -28,7 +28,7 @@ const fetchProposals = async ({
     setProposals,
     setLoadingProposals,
     setLoadingSummaries
-}: FetchProposalsParams): Promise<void> => { 
+}: FetchProposalsParams): Promise<void> => {
     try {
         const response = await fetch('https://hub.snapshot.org/graphql', {
             method: 'POST',

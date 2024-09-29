@@ -1,5 +1,4 @@
 "use client";
-import NotificationsPage from "@/app/notifications/page";
 import { useHiveUser } from "@/contexts/UserContext";
 import HiveClient from "@/lib/hive/hiveclient";
 import { HiveAccount } from "@/lib/models/user";
@@ -35,6 +34,7 @@ import LoginModal from "../Hive/Login/LoginModal";
 import CommunityTotalPayout from "../communityTotalPayout";
 // import checkRewards from "./utils/checkReward";
 import { claimRewards } from "./utils/claimRewards";
+import Confetti from 'react-confetti';
 
 const blink = keyframes`
   0% { color: gold; opacity: 1; }
@@ -55,6 +55,7 @@ const SidebarDesktop = () => {
   const { openAccountModal } = useAccountModal();
   const [hiveAccount, setHiveAccount] = useState<HiveAccount>();
   const client = HiveClient;
+  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
     if (hiveUser?.name) {
@@ -63,10 +64,10 @@ const SidebarDesktop = () => {
           const userAccount = await client.database.getAccounts([hiveUser.name]);
           if (userAccount.length > 0) {
             const account = userAccount[0];
-            
+
             const getBalance = (balance: string | Asset): number => {
-                const balanceStr = typeof balance === 'string' ? balance : balance.toString();
-                return Number(balanceStr.split(' ')[0]);
+              const balanceStr = typeof balance === 'string' ? balance : balance.toString();
+              return Number(balanceStr.split(' ')[0]);
             };
 
             const hbdBalance = getBalance(account.reward_hbd_balance);
@@ -116,6 +117,11 @@ const SidebarDesktop = () => {
     if (hiveAccount) {
       await claimRewards(hiveAccount);
       setHasRewards(false);
+      setShowConfetti(true);
+      // after 5 seconds, hide the confetti
+      setTimeout(() => {
+        setShowConfetti(false);
+      }, 7000);
     }
   };
 
@@ -134,6 +140,8 @@ const SidebarDesktop = () => {
 
   return (
     <>
+      {showConfetti && <Confetti />}
+
       <LoginModal isOpen={isLoginOpen} onClose={onLoginClose} />
       <Box
         bg="Black"
@@ -147,8 +155,9 @@ const SidebarDesktop = () => {
       >
         <Heading size="md">
           <Image
-            boxSize={"48px"}
-            src="/skatehive_square_green.png"
+            width={"48px"}
+            height={"auto"}
+            src="/SKATE_HIVE_VECTOR_FIN.svg"
             alt="SkateHive"
             borderRadius={"5px"}
             _hover={{
