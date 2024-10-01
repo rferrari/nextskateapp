@@ -1,20 +1,22 @@
 import useHiveBalance from '@/hooks/useHiveBalance';
+// import { convertVestingSharesToHivePower } from "@/app/wallet/utils/calculateHP";
 import { HiveAccount } from '@/lib/useHiveAuth';
-import {
-    Box, Button, Card, CardBody, CardFooter, CardHeader, Center, Flex,
-    HStack, Image, Text, useDisclosure, VStack
-} from '@chakra-ui/react';
+import { updateProfile } from '@/lib/hive/client-functions';
+import { Box, Button, Card, CardBody, CardFooter, CardHeader, Center, Flex,
+         HStack, Image, Text, useDisclosure, VStack
+        } from '@chakra-ui/react';
 import React, { useMemo, useState } from 'react';
-import { FaArrowDown, FaHive } from 'react-icons/fa';
+import { FaHive } from 'react-icons/fa';
 import { FaPencil } from "react-icons/fa6"
 import UserAvatar from '../UserAvatar';
 import useGnarsBalance from '@/hooks/useGnarsBalance';
 import EditInfoModal from "./EditInfoModal"
 import '../../styles/profile-card-styles.css';
 
+import { dummyMissions } from './missionsData';
+
 interface ProfileCardProps {
-    user: HiveAccount,
-    userXp: Number
+    user: HiveAccount
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
@@ -28,10 +30,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
     const { hivePower } = useHiveBalance(user);
 
     const [userXp, setUserXp] = useState(userMetadata.extensions?.staticXp || 0);
+    const [userLevel, setUserLvl] = useState(userMetadata.extensions?.level || 1);
     const [userVideoParts, setUserVideoParts] = useState(userMetadata.extensions?.video_parts?.length || 0);
 
-    // const userLevel = userMetadata.extensions?.level || 0;
-    const userLevel = 3;    //debug lvl
+    // const user_posting_metadata = JSON.parse(user.posting_json_metadata || '{}');
+    // const userLevel = 4;    //debug lvl
 
     const handleClick = () => {
         setIsFlipped(!isFlipped);
@@ -44,8 +47,110 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
         return `/public/${url}`;
     };
 
+    const xpThresholds = [0, 180, 270, 540, 720, 900, 1080];
+
+    function calculateLevel(xp: number): number {
+        let level = 1;
+        for (let i = 1; i < xpThresholds.length; i++) {
+            if (xp >= xpThresholds[i]) {
+                level = i+1;
+            }
+        }
+        return level;
+    }    
+
+    const safeParse = (jsonString: string) => {
+        try {
+            return JSON.parse(jsonString);
+        } catch (error) {
+            return null;
+        }
+    };
+
+    function isMissionCompleted(user: any): number{
+        var totalXP = xpThresholds[userLevel-1];
+        var json = safeParse(user.posting_json_metadata)
+        var ext =  safeParse(user.json_metadata)
+        if(userLevel == 1) {
+            if(json.profile?.profile_image)
+                totalXP += dummyMissions[userLevel][0].xp;
+
+            if (json.profile?.name && json.profile?.about) 
+                totalXP += dummyMissions[userLevel][1].xp;
+
+            if (user.last_post)
+                totalXP += dummyMissions[userLevel][2].xp;
+
+        } else if (userLevel == 2) {
+            if(user.witness_votes.includes("skatehive"))
+                totalXP += dummyMissions[userLevel][0].xp;
+
+            if (ext?.extensions?.eth_address)
+                totalXP += dummyMissions[userLevel][1].xp;
+
+            if (user.post_count > 5)
+                totalXP += dummyMissions[userLevel][2].xp;
+
+        } else if (userLevel == 3) {
+            if (hivePower > 50)
+                totalXP += dummyMissions[userLevel][0].xp;
+
+            if (user.last_post && new Date(user.last_post).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000)
+                totalXP += dummyMissions[userLevel][1].xp;
+
+            if(user.post_count > 100)
+                totalXP += dummyMissions[userLevel][2].xp;
+        } else if (userLevel == 4){
+            if (parseFloat(user.savings_hbd_balance.replace(/[^0-9.]/g, '')) >= 100)
+                totalXP += dummyMissions[userLevel][2].xp;
+        }
+        return totalXP;
+    }
+
+    function calculateTotalXp(user: HiveAccount) {
+        return isMissionCompleted(user);
+    };
+
     const handleProfileUpdate = () => {
-        console.log("Logic to handle the profile update");
+
+    }
+
+    const handleLevelUp = () => {
+        const loginMethod = localStorage.getItem('LoginMethod');
+
+        console.log("User Level: ", userLevel)
+        console.log(userPostingMetadata)
+        if (loginMethod === 'keychain') {
+            var newuserXP = calculateTotalXp(user);
+            const newLevel = calculateLevel(newuserXP);  // Calculate the new level based on available XP
+
+            setUserXp(newuserXP);
+            setUserLvl(newLevel);
+
+            updateProfile(
+                String(user.name),
+                userPostingMetadata.profile.name,
+                userPostingMetadata.profile.about,
+                userPostingMetadata.profile.location,
+                userPostingMetadata.profile.cover_image,
+                userPostingMetadata.profile.profile_image,
+                userPostingMetadata.profile.website,
+                userMetadata.extensions?.eth_address,
+                userMetadata.extensions?.video_parts,
+                newLevel,           // Pass the new level
+                newuserXP,          // Pass the updated XP
+                newuserXP,          // Pass the cumulative XP ??????
+            ).then( (result) => {
+                if(!result) {
+                    setUserLvl(userLevel);
+                    setUserXp(userXp);
+                }
+            });
+            
+        }
+        else if (loginMethod === 'privatekey') {
+            // Handle the private key method if necessary
+        }
     };
 
     return (<>
@@ -68,7 +173,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                     transformStyle: 'preserve-3d',
                     perspective: '2000px',
                     width: '310px',
-                    height: '550px',
+                    height: '480px',
                 }}
             >
 
@@ -105,10 +210,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                                     {user.name}
                                 </Text>
                             </HStack>
-                            <Text fontWeight="bold" fontSize="18px">
+                            <Text fontWeight="bold" fontSize="18px"
+                                  textShadow="2px 2px 1px rgba(0,0,0,1)">
                                 XP {userXp}
                             </Text>
-                            <Text fontWeight="bold" fontSize="18px">
+                            <Text fontWeight="bold" fontSize="18px"
+                                  textShadow="2px 2px 1px rgba(0,0,0,1)">
                                 Lvl {userLevel}
                             </Text>
                         </HStack>
@@ -120,8 +227,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                     >
                         <VStack>
                             <Center>
-                                <Box borderRadius={100} border="3px solid white">
-                                    <UserAvatar hiveAccount={user} borderRadius={100} boxSize={150} />
+                                <Box borderRadius={14} border="3px solid white">
+                                    <UserAvatar hiveAccount={user} borderRadius={14} boxSize={150} size="" />
                                 </Box>
                             </Center>
                         </VStack>
@@ -168,8 +275,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                         <VStack w="100%">
                             <Flex justify="center">
                                 <div style={{ zIndex: 10 }}>
-                                    <Button className={`box-level-${userLevel}`}
-                                        _hover={{ background: "black", color:"white!important" }}
+                                    <Button className={`box-level-${userLevel} btn-profile-card`}
+                                        // _hover={{ background: "black", color:"white!important" }}
                                         // color="white"
                                         // border="1px solid white"
                                         width="100%"
@@ -187,8 +294,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                                             onOpen();
                                         }}
                                     ></Button>
-                                    <Button className={`box-level-${userLevel}`}
-                                        _hover={{ background: "black", color:"white!important" }}
+                                    <Button className={`box-level-${userLevel} btn-profile-card`}
+                                        // _hover={{ background: "black", color:"white!important" }}
                                         leftIcon={<FaHive size={"22px"} />}
                                         width={"100%"}
                                         m={2}
@@ -201,10 +308,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                                         }}
                                         onClick={(event) => {
                                             event.stopPropagation();
-                                            handleProfileUpdate();
+                                            handleLevelUp();
                                         }}
                                     >
-                                        Claim XP
+                                        Upgrade
                                     </Button>
                                 </div>
                             </Flex>
@@ -238,10 +345,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                                     {user.name}
                                 </Text>
                             </HStack>
-                            <Text fontWeight="bold" fontSize="18px">
+                            <Text fontWeight="bold" fontSize="18px"
+                                  textShadow="2px 2px 1px rgba(0,0,0,1)">
                                 XP {userXp}
                             </Text>
-                            <Text fontWeight="bold" fontSize="18px">
+                            <Text fontWeight="bold" fontSize="18px"
+                                  textShadow="2px 2px 1px rgba(0,0,0,1)">
                                 Lvl {userLevel}
                             </Text>
                         </HStack>
@@ -253,19 +362,20 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                         height="100%"
                         borderRadius="20px"
                         padding={0}
-                        marginTop={5}
+                        marginTop={0.2}
                     >
                         <CardHeader id='backSideBodyHeader'
                             style={{
                                 backgroundImage: `url(${nextImage(userPostingMetadata?.profile?.cover_image || `https://images.ecency.com/webp/u/${user.name}/cover/small`)})`,
                                 backgroundSize: 'cover',
                                 backgroundPosition: 'center',
-                                borderBottom: '1px solid white',
+                                borderBottom: '1px solid silver',
+                                borderRight: '1px solid silver',
                                 borderRadius: '10px',
                                 textAlign: 'center',
                                 backgroundColor: 'gray.900',
                                 padding: '0.5em',
-                                margin: '2em 1em 2em 1em'
+                                margin: '1em 0em 2em 0em'
                             }}>
                             <HStack justify="center">
                                 <UserAvatar hiveAccount={user} borderRadius={100} boxSize={20} />

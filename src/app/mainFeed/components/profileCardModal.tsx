@@ -21,9 +21,7 @@ const ProfileCardModal = ({ isOpen, onClose, profile }: ProfileCardModalProps) =
                 <ModalCloseButton ml={5} />
                 <ModalBody>
                     <Center>
-                        {/* ProfileCardModal Is used someware? #vaipraonde                        
-                        <ProfileCard user={profile} userXp={userXp} />
-                        <ProfileCard user={profile} /> */}
+                        <ProfileCard user={profile} />
                     </Center>
                 </ModalBody>
             </ModalContent>
