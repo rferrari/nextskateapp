@@ -23,7 +23,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { Discussion } from "../../../lib/hive/dhive/lib";
+import { Discussion } from "@hiveio/dhive";
 import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import HTMLFlipBook from "react-pageflip";

@@ -4,7 +4,7 @@ import { MarkdownRenderers } from '@/app/upload/utils/MarkdownRenderers';
 import { sendHiveOperation } from '@/lib/hive/server-functions';
 import PostModel from '@/lib/models/post';
 import { Box, Button, Center, Flex, HStack, Image, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, Textarea, useMediaQuery } from '@chakra-ui/react';
-import { Operation } from '../../lib/hive/dhive/lib';
+import { Operation } from '@hiveio/dhive';
 import { diff_match_patch } from 'diff-match-patch';
 import { Fragment, useEffect, useState } from 'react';
 import { FaEye } from 'react-icons/fa';

@@ -21,7 +21,7 @@ import {
     MenuList,
     Text
 } from "@chakra-ui/react";
-import { Operation } from "../../../lib/hive/dhive/lib";
+import { Operation } from "@hiveio/dhive";
 import { Broadcast, KeychainKeyTypes, KeychainSDK } from "keychain-sdk";
 import { useEffect, useState } from "react";
 import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';

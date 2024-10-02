@@ -1,5 +1,5 @@
 import HiveClient from "@/lib/hive/hiveclient";
-import { Discussion } from "../lib/hive/dhive/lib";
+import { Discussion } from "@hiveio/dhive";
 import { useEffect, useState } from "react";
 
 export default function usePosts(query: String, params: any[]) {

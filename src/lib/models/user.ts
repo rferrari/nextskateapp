@@ -1,4 +1,4 @@
-import { Account } from "../../lib/hive/dhive/lib";
+import { Account } from "@hiveio/dhive";
 
 interface HiveAccountMetadataProps {
   [key: string]: any

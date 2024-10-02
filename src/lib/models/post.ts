@@ -1,4 +1,4 @@
-import { Asset, Discussion } from "../../lib/hive/dhive/lib"
+import { Asset, Discussion } from "@hiveio/dhive"
 import { extractFirstLink, getWebsiteURL } from "../utils"
 import { HiveAccount } from "./user"
 

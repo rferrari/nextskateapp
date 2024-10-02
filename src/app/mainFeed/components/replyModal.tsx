@@ -18,7 +18,7 @@ import {
     Textarea,
     VStack
 } from "@chakra-ui/react";
-import * as dhive from "../../../lib/hive/dhive/lib";
+import * as dhive from "@hiveio/dhive";
 import { useState } from "react";
 import CarrouselRenderer from "../utils/CarrouselRenderer";
 

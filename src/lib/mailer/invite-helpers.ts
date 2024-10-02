@@ -1,4 +1,4 @@
-import * as dhive from '../../lib/hive/dhive/lib';
+import * as dhive from '@hiveio/dhive';
 import serverMailer from './route';
 
 export const client = new dhive.Client([

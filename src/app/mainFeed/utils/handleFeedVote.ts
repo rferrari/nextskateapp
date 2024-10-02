@@ -1,6 +1,6 @@
 import { vote } from "@/lib/hive/client-functions"
 import { voteWithPrivateKey } from "@/lib/hive/server-functions"
-import { VoteOperation } from "../../../lib/hive/dhive/lib"
+import { VoteOperation } from "@hiveio/dhive"
 // Modify handleVote function to accept weight parameter
 // Modify handleVote function to accept weight parameter
 export const handleVote = async (

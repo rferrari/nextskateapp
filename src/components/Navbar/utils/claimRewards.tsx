@@ -1,4 +1,4 @@
-import { Operation } from "../../../lib/hive/dhive/lib"
+import { Operation } from "@hiveio/dhive"
 import { HiveAccount } from "@/lib/models/user"
 import { KeychainSDK, KeychainKeyTypes, Broadcast } from "keychain-sdk"
 import { sendHiveOperation } from "@/lib/hive/server-functions"

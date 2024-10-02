@@ -339,18 +339,21 @@ exports.Signature = Signature;
  * @param chainId The chain id to use when creating the hash.
  */
 function transactionDigest(transaction, chainId = client_1.DEFAULT_CHAIN_ID) {
-    const buffer = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN);
+    // const buffer = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN);
+    var buffer = Buffer.from([]);
     try {
         serializer_1.Types.Transaction(buffer, transaction);
     }
     catch (cause) {
-        throw new verror_1.VError({ cause, name: 'SerializationError' }, 'Unable to serialize transaction');
+        // throw new verror_1.VError({ cause, name: 'SerializationError' }, 'Unable to serialize transaction');
     }
-    buffer.flip();
-    const transactionData = Buffer.from(buffer.toBuffer());
+    // buffer.flip();
+    const transactionData = Buffer.from(buffer.toBuffer(transaction));
     const digest = sha256(Buffer.concat([chainId, transactionData]));
     return digest;
 }
+
+
 /**
  * Return copy of transaction with signature appended to signatures array.
  * @param transaction Transaction to sign.
@@ -373,7 +376,8 @@ function signTransaction(transaction, keys, chainId = client_1.DEFAULT_CHAIN_ID)
     return signedTransaction;
 }
 function generateTrxId(transaction) {
-    const buffer = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN);
+    // const buffer = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN);
+    const buffer = Buffer.from([]);
     try {
         serializer_1.Types.Transaction(buffer, transaction);
     }

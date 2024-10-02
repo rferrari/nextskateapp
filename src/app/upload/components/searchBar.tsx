@@ -7,7 +7,7 @@ import {
     Spinner,
     Text
 } from '@chakra-ui/react';
-import { Client } from "../../../lib/hive/dhive/lib";
+import { Client } from "@hiveio/dhive";
 import debounce from 'lodash/debounce';
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";

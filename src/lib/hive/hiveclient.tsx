@@ -1,5 +1,4 @@
-import { Client } from "../../lib/hive/dhive/lib"
-const dhive = require("../../lib/hive/dhive/lib");
+import { Client } from "@hiveio/dhive"
 
 const HiveClient = new Client([
   "https://api.deathwing.me",
@@ -10,6 +9,4 @@ const HiveClient = new Client([
   "https://hive-api.3speak.tv",
 ])
 
-
-export { dhive };
 export default HiveClient

@@ -1,5 +1,5 @@
 import { useHiveUser } from "@/contexts/UserContext"
-import * as dhive from "../lib/hive/dhive/lib"
+import * as dhive from "@hiveio/dhive"
 import { checkCommunitySubscription, communitySubscribeKeyChain } from "./hive/client-functions"
 import HiveClient from "./hive/hiveclient"
 import { communitySubscribePassword, hiveServerLoginWithPassword } from "./hive/server-functions"
